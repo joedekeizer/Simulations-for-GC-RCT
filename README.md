@@ -9,30 +9,10 @@ In the article (DOI. XX), we investigated by simulations the performances of G-c
 
 Two distinct scenarios were simulated. In the provided code we consider the complex scenario where the estimation of the outcome model was not straightforward. In the article, we considered different marginal treatment effects and sample sizes. For all the scenarios 10,000 data sets were generated.
 
-[DAGcomplexe.pdf](https://github.com/user-attachments/files/17360824/DAGcomplexe.pdf)
+![dagcomplexe](https://github.com/user-attachments/assets/82e7b683-0814-45fd-8ca2-1b675d03dfc0)
 
-| **Variable** | **Role in the Study** | **Distribution** |
-|--------------|-----------------------|------------------|
-| X₁           | Continuous covariate  | 𝓝(0, 1)          |
-| X₂           | Continuous covariate  | 𝓝(β₀ + β₁ * X₁, 1)  |
-| X₃           | Continuous covariate  | 𝓝(β₀ - β₁ * X₁ - β₂ * X₂, 1) |
-| X₄           | Continuous covariate  | 𝓝(0, 1)          |
-| X₅           | Binary covariate      | 𝟙{𝓝(0, 1) > 0.67} (i.e., prevalence ~ 25%)  |
-| X₆           | Binary covariate      | 𝟙{𝓝(β₀ - β₁ * X₄, 1) > -0.40} (i.e., prevalence ~ 50%) |
-| X₇           | Continuous covariate  | 𝓝(β₀ - β₁ * X₅, 1) |
-| X₈           | Binary covariate      | 𝟙{𝓝(β₀ + β₁ * X₆, 1) > -0.80} (i.e., prevalence ~ 75%) |
-| X₉           | Continuous covariate  | 𝓝(β₀ + β₁ * X₇, 1) |
-| X₁₀          | Continuous covariate  | 𝓝(0, 1)          |
-| X₁₁          | Binary covariate      | 𝟙{𝓝(β₀ + β₁ * X₈, 1) > 0.84} (i.e., prevalence ~ 25%) |
-| X₁₂          | Continuous covariate  | 𝓝(β₀ - β₁ * X₁₁ - β₂ * X₁₀, 1) |
-| X₁₃          | Continuous covariate  | 𝓝(β₀ - β₁ * X₁₁, 1) |
-| X₁₄          | Continuous covariate  | 𝓝(0, 1)          |
-| X₁₅          | Binary covariate      | 𝟙{𝓝(0, 1) > 0.67} (i.e., prevalence ~ 25%) |
-| X₁₆          | Binary covariate      | 𝟙{𝓝(0, 1) > 0.67} (i.e., prevalence ~ 25%) |
-| X₁₇          | Continuous covariate  | 𝓝(0, 1)          |
-| A            | Binary treatment arm   | 𝟙{𝓝(0, 1) > 0} (i.e., a 1:1 randomized clinical trial) |
-| Y            | Binary outcome        | 𝓑(n, p = logistic(β₂ + β₃ * 𝟙{X₂ > -0.44} - β₃ * X₃ + (β₃ / 2) * X₃² + β₃ * X₅ + β₃ * X₆ + β₃ * X₉ + (β₃ / 2) * X₁₀² - β₃ * X₁₂ - β₃ * (X₁₃ > -0.55) + β₃ * X₁₄ + β₃ * X₁₅ + (β₃ / 2) * A * X₁₄ + β₄ * A) |
-* 𝟙{a} = 1 if the condition a is true and 0 otherwise; 𝓝(μ, σ) represents a Gaussian distribution with mean at μ and standard deviation at σ; 𝓑(n, p) represents a Binomial distribution with a size n and probability of success p. The regression coefficients were: β₀ = -0.4, β₁ = log(2), β₂ = -2, β₃ = log(2), and β₄ = log(3); log(1.5); log(0.9729) to obtain mOR values of 1.9; 1.3; 1.00 respectively.
+
+![tablea1](https://github.com/user-attachments/assets/98ef0978-80c2-4038-aa8d-7d4bfc9c08f3)
 
 
 
