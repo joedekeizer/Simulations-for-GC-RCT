@@ -87,7 +87,7 @@ elasticnet.param <- train(outcome ~ ttt * (bs(x1, df = 3) + bs(x2, df = 3) + bs(
 elasticnet.param = train(outcome ~ ttt * (bs(x1, df = 3) + bs(x2, df = 3) + bs(x3, df = 3) + x4 + x5 + x6), data = base.train,
 				method = 'glmnet',  tuneLength = 20, metric = "ROC", trControl = control,
 				family = "binomial", penalty.factor = c(0,rep(1,24)))
-``` r			   
+``` 		   
 
 This R script has a long processing time, so parallel processing is highly recommended. The code was written to allow for stopping and resuming execution from where it was left off.
 
