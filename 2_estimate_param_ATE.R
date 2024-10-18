@@ -1,52 +1,41 @@
 #################################################################
-###### Get the empircal values
+###### (2) Estimate theoretical values of marginal effects
+#################################################################
+### This code will create one .Rdata file in the specified work directory
+### The file will contain 1000000 estimates of the outcomes (p0 and p1) for each treatment group, along with the corresponding logOR and delta values
 #################################################################
 library(dplyr)
 library(doParallel)
 
-rm(list = ls())
-
-gc()
-
-path = "/home/joedekeizer/Simulations/"
-Size.Effect = "log3"
-sizeEffect = log(3)
-N.effectif = 200
-
-N.start = 1
-N.stop = 1000000
-
-
+### Initialization
+path <- "/home/Simulations/" #Work directory
+Size.Effect <- "log3" #The beta4 coefficient from Supplementary Table A1 for folder names (character format)
+sizeEffect <- log(3) #Same beta4 coefficient but numeric for the simulations (numeric)
+N.effectif <- 200 #Sample size (numeric)
+N.stop <- 1000000 #1 million data sets to simulate
 setwd(path)
 
-nb.cluster = parallel::detectCores() - 1 #- round(0.1 * parallel::detectCores())
 
+### Parallelisation of the code (PSOCK if Windows and FORK if Linux environment)
+nb.cluster <- parallel::detectCores() - 1 #All cores minus one
 if(.Platform[[1]] == "windows") {cl <- makeCluster(nb.cluster, type="PSOCK") } else{ cl <- makeCluster(nb.cluster, type="FORK") }
 registerDoParallel(cl)
 if(.Platform[[1]] == "windows") {clusterEvalQ(cl, {library(dplyr);library(MASS);library(splines);library(caret);library(SuperLearner);library(glmnet);library(cvAUC)})}
 
 
+#################################################################
 
-# library(doSNOW)
-# cl <- makeSOCKcluster(90)
-# registerDoSNOW(cl)
-
-
-
-
-calcul.logOR = function(p0, p1)
+### Function to simulate data; same as the sim_bases.R file without saving the data
+sim.base <- function(N, beta1.t, iter)
 {
-  return(log((p1*(1-p0))/(p0*(1-p1))))
-}
-sim.base = function(N, beta1.t)
-{
-  beta0.x = -0.4
-  beta1.x = log(2)
+  ### Coefficient from Supplementary Table A1
+  beta0.x <- -0.4
+  beta1.x <- log(2)
   
-  beta0.o = -2
-  beta1.o = log(2)
+  beta0.o <- -2
+  beta1.o <- log(2)
   
-  
+  ### Simulated variables from the complex scenario Figure 1
   .x1 <- rnorm(N, 0, 1) #1
   .x2 <- rnorm(N, beta0.x + beta1.x * .x1, 1) #2
   .x3 <- rnorm(N, beta0.x - beta1.x * .x1 - beta1.x * .x2, 1) #3
@@ -84,8 +73,7 @@ sim.base = function(N, beta1.t)
                          x21 = .x21)
   data.obs$ttt = rbinom(N, size = 1, prob = 0.5)
   
-  # mean(data.obs$ttt)
-  
+  ### Causal relations between the variables and the outcome from the complex scenario Figure 1
   bx <- beta0.o +
     beta1.o * (data.obs$x2 > -0.44) -
     beta1.o * data.obs$x3 + (beta1.o / 2) * (data.obs$x3^2) +
@@ -100,73 +88,57 @@ sim.base = function(N, beta1.t)
     beta1.o * 0.5 * data.obs$ttt*data.obs$x18 +
     beta1.t * data.obs$ttt
   
-  
-  
-  pr.o.obs = plogis(bx)
-  mean(pr.o.obs)
+  pr.o.obs <- plogis(bx)
   
   data.obs$outcome <- rbinom(N, 1, prob = pr.o.obs)
   
-  
   return(data.obs)
 }
-res.sim = function(i, data.obs)
+
+
+### Function to calculate logOR
+calcul.logOR <- function(p0, p1)
 {
-  p0 = sum(data.obs$outcome[data.obs$ttt == 0]/sum(1*I(data.obs$ttt == 0)))
-  p1 = sum(data.obs$outcome[data.obs$ttt == 1]/sum(1*I(data.obs$ttt == 1)))
+  return(log((p1*(1-p0))/(p0*(1-p1))))
+}
+
+
+### Function to return p0, p1, their delta and logOR for a simulated data set
+res.sim <- function(i, data.obs)
+{
+  p0 <- sum(data.obs$outcome[data.obs$ttt == 0]/sum(1*I(data.obs$ttt == 0)))
+  p1 <- sum(data.obs$outcome[data.obs$ttt == 1]/sum(1*I(data.obs$ttt == 1)))
   
-  # mod = summary(glm(outcome ~ ttt, family = binomial(link = "logit"), data = data.obs))
-  # mod = prop.test(sum(data.obs$outcome[data.obs$ttt == 0]), sum(1*I(data.obs$ttt == 0)), correct = F)
-  
-  B = 1000
-  p0.boot = p1.boot = logOR.boot = delta.boot = NA
-  for(b in 1:B)
-  {
-    boot = data.obs[sample(1:N.effectif, size = N.effectif, replace = T),]
-    
-    p0.boot[b] = sum(boot$outcome[boot$ttt == 0]/sum(1*I(boot$ttt == 0)))
-    p1.boot[b] = sum(boot$outcome[boot$ttt == 1]/sum(1*I(boot$ttt == 1)))
-    logOR.boot[b] = calcul.logOR(p0 = p0.boot[b], p1 = p1.boot[b])
-    delta.boot[b] = p1.boot[b] - p0.boot[b]
-  }
-  
-  
-  res = data.frame(
+  res <- data.frame(
     iter = i,
     n0 = sum(1*I(data.obs$ttt == 0)),
     n1 = sum(1*I(data.obs$ttt == 1)),
     p0 = p0,
     p1 = p1,
     logOR = calcul.logOR(p0 = p0, p1 = p1),
-    delta = p1 - p0,
-    
-    # sd.p0 = sqrt((p0*(1 - p0))/sum(1*I(data.obs$ttt == 0))),
-    # sd.p1 = sqrt((p1*(1 - p1))/sum(1*I(data.obs$ttt == 1))),
-    # sd.logOR = mod$coefficients[2,2],
-    
-    sd.p0 = sd(p0.boot),
-    sd.p1 = sd(p1.boot),
-    sd.logOR = sd(logOR.boot),
-    sd.delta = sd(delta.boot)
+    delta = p1 - p0
   )
   
   return(res)
 }
 
 
-res <-  foreach(i = N.start:N.stop, .combine = rbind, .inorder = FALSE, .verbose = T) %dopar%
-  {res.sim(i, data.obs = sim.base(N = N.effectif, beta1.t = sizeEffect))}
+#################################################################
 
+### Running the function with parallel processing (not necessary but recommended)
+if(.Platform[[1]] == "windows") {
+  ### Windows
+  res <- foreach(i = 1:N.stop, .combine = rbind,  .inorder = FALSE, .verbose = T,
+          .packages = c("dplyr")
+  ) %dopar% {res.sim(i, data.obs = sim.base(N = N.effectif, beta1.t = sizeEffect))}
+} else {
+  ### Linux
+  res <- foreach(i = 1:N.stop, .combine = rbind,  .inorder = FALSE, .verbose = T
+  ) %dopar% {res.sim(i, data.obs = sim.base(N = N.effectif, beta1.t = sizeEffect))}
+}
 
-# registerDoSEQ()
 stopCluster(cl)
 
+### Save as .Rdata in the work directory
+setwd(path)
 save(res, file = paste0("res_n", N.effectif, "_ate", Size.Effect, ".Rdata"))
-
-head(res)
-
-print(mean(exp(res$logOR)))
-
-
-
-

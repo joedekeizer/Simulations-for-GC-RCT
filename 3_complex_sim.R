@@ -1,5 +1,9 @@
 #################################################################
-###### Applying the different methods on the simulated data
+###### (3) Applying the different methods on the simulated data
+#################################################################
+### This code will create a folder in the specified work directory named /results_complex_nXX_ateYY where XX is the sample size (N.effectif) and YY the effect size (Size.Effect)
+### In the folder it will create a .csv file with the results of all the employed methods on the simulated data
+### Paralellization is highly recommended to reduce the processing time, the code is written so that it saves the progress as it runs with the possibility to pause and resume (skip data already with results)
 #################################################################
 library(dplyr)
 library(MASS)
@@ -11,42 +15,39 @@ library(doParallel)
 library(cvAUC)
 
 ### Initialization
-path = "/home/Simulations/" #Work directory
-Size.Effect = "log3" #The beta4 coefficient from Supplementary Table A1
-N.effectif = 350 #Sample size
-N.stop = 10000 #10k datasets to simulate and save as Rdata (data.obs)
+path <- "/home/Simulations/" #Work directory containing the folder with the simulated datasets
+Size.Effect <- "log3" #The beta4 coefficient from Supplementary Table A1 (character format)
+N.effectif <- 200 #Sample size (numeric)
+N.stop <- 10000 #10k datasets to simulate and save as Rdata (data.obs)
+B <- 500 #This is 500 for the simulations
+V.crossvalid <- 20 #Number of crossvalidations
+setwd(paste0(path, "/complex_n", N.effectif, "_ate", Size.Effect, "/")) #set to work directory to the location of the simulated data
+
 
 ### Parallelisation of the code (PSOCK if Windows and FORK if Linux environment)
-nb.cluster = parallel::detectCores() - 1 #All cores minus one
+nb.cluster <- parallel::detectCores() - 1 #All cores minus one
 if(.Platform[[1]] == "windows") {cl <- makeCluster(nb.cluster, type="PSOCK") } else{ cl <- makeCluster(nb.cluster, type="FORK") }
 registerDoParallel(cl)
 if(.Platform[[1]] == "windows") {clusterEvalQ(cl, {library(dplyr);library(MASS);library(splines);library(caret);library(SuperLearner);library(glmnet);library(cvAUC)})}
 
-### Number of bootstraps
-B = 500 #This is 500 for the simulations
-path = paste0(getwd(),"/") #Work directory
-
-V.crossvalid = 20 #Number of crossvalidations
-stopImplicitCluster()
-
-setwd(paste0(path, "/complex_n", N.effectif, "_ate", Size.Effect, "/")) #Simulated data directory
-liste = list.files() %>% as.character #list all 10000 simulated datasets
 
 ### Create the folder for the results if it does not already exist
-pathresults = paste0(path, "resultats_complex_n", N.effectif, "_ate", Size.Effect, "/")
+pathresults <- paste0(path, "results_complex_n", N.effectif, "_ate", Size.Effect, "/")
 ifelse(!dir.exists(file.path(pathresults)), dir.create(file.path(pathresults)), FALSE)
 
 
 ################################################################################
 
 ### Function to use our ML methods on the datasets and save the results of all 500 bootstraps 
-iteration = function(iter) 
+iteration <- function(iter) 
 {
+  
   ### Functions used for reporting the results and for the Superlearner 
-  calcul.logOR = function(p0, p1)
+  calcul.logOR <- function(p0, p1)
   {
     return(log((p1*(1-p0))/(p0*(1-p1))))
   }
+  
   ### SL elasticnet
   SL.elasticnet.caret <- function (Y, X, newX, family,  ...)
   {
@@ -68,6 +69,7 @@ iteration = function(iter)
     out <- list(pred = pred, fit = fit)
     return(out)
   }
+  
   ### SL lasso
   SL.lasso.caret <- function (Y, X, newX, family,  ...)
   {
@@ -89,6 +91,7 @@ iteration = function(iter)
     out <- list(pred = pred, fit = fit)
     return(out)
   }
+  
   ### SL neural network
   SL.mlp.caret <- function (Y, X, newX, family, ...)
   {
@@ -100,6 +103,7 @@ iteration = function(iter)
     class(out$fit) <- c("SL.mlp.caret")
     return(out)
   }
+  
   ### SL support vector machine
   SL.ksvm.caret <- function (Y, X, newX, family, type = "C-svc", kernel = "rbfdot", kpar = "automatic", nu = 0.2, epsilon = 0.1, cross = 0, prob.model = family$family == "binomial", class.weights = NULL, cache = 40, tol = 0.001, shrinking = T, ...)
   {
@@ -120,16 +124,16 @@ iteration = function(iter)
   
   ### Load a simulated dataset
   load(liste[iter])
-  data.obs1 = data.obs0 = data.obs
+  data.obs1 <- data.obs0 <- data.obs
   
   ### Creating the counterfactual datasets for the GC
-  data.obs1$ttt = 1
-  data.obs0$ttt = 0
+  data.obs1$ttt <- 1
+  data.obs0$ttt <- 0
   
   ### Preparation for the ML
-  base.train = data.obs
-  base.train$outcome[base.train$outcome == 1] = "yes"
-  base.train$outcome[base.train$outcome == 0] = "no"
+  base.train <- data.obs
+  base.train$outcome[base.train$outcome == 1] <- "yes"
+  base.train$outcome[base.train$outcome == 0] <- "no"
   base.train$outcome <- as.factor(base.train$outcome)
   
   ### Control parameters for the predictions
@@ -139,9 +143,9 @@ iteration = function(iter)
                           summaryFunction = twoClassSummary,
                           method = "cv")
   
-  ### Tuning prarameters by maximizing the AUC of the ROC curve with 20-fold cross-validation
+  ### Tuning parameters by maximizing the AUC of the ROC curve with 20-fold cross-validation
   mlp.param <- train(outcome ~ ., data = base.train, method = 'mlp', tuneGrid = expand.grid(size=1:20), metric = "ROC", trControl = control)
-  elasticnet.param = train(outcome ~ ttt * (bs(x1, df = 3) + bs(x2, df = 3) + bs(x3, df = 3) + bs(x5, df = 3) +
+  elasticnet.param <- train(outcome ~ ttt * (bs(x1, df = 3) + bs(x2, df = 3) + bs(x3, df = 3) + bs(x5, df = 3) +
                                               x6 + x7 + bs(x8, df = 3) + x9 + bs(x10, df = 3) +
                                               bs(x11, df = 3) + x12 + bs(x14, df = 3) + bs(x15, df = 3) +
                                               bs(x18, df = 3) + x19 + x20 + bs(x21, df = 3)), data = base.train,
@@ -153,11 +157,11 @@ iteration = function(iter)
                                           bs(x18, df = 3) + x19 + x20 + bs(x21, df = 3)),
                        data = base.train, method = 'glmnet',   tuneGrid = expand.grid(.alpha = 1, .lambda = unique(elasticnet.param$results$lambda)),
                        metric = "ROC", trControl = control, family = "binomial", penalty.factor = c(0, rep(1, 78)) )
-  svmRadial.param <-  train(outcome ~ .,  data = base.train, method = 'svmRadialSigma', trace = FALSE, tuneLength = 20,
+  svmRadial.param <- train(outcome ~ .,  data = base.train, method = 'svmRadialSigma', trace = FALSE, tuneLength = 20,
                             metric = "ROC", trControl = control,  allowParallel = FALSE)
 
-  y.sl <-  as.numeric(base.train$outcome) - 1
-  x.sl <-  base.train[, names(base.train) != "outcome"]
+  y.sl <- as.numeric(base.train$outcome) - 1
+  x.sl <- base.train[, names(base.train) != "outcome"]
   x.sl.new <- data.frame(rbind(x.sl, x.sl))
   x.sl.new$ttt[1:N.effectif] <- 1 #1
   x.sl.new$ttt[(N.effectif + 1):(2 * N.effectif)] <- 0 #0
@@ -170,12 +174,12 @@ iteration = function(iter)
   
 
   ### Initialization of the results
-  p0.unadjusted.bcv = p1.unadjusted.bcv = logOR.unadjusted.bcv = delta.unadjusted.bcv =
-  p0.elasticnet.bcv = p1.elasticnet.bcv = logOR.elasticnet.bcv = delta.elasticnet.bcv =
-  p0.lasso.bcv = p1.lasso.bcv = logOR.lasso.bcv = delta.lasso.bcv =
-  p0.mlp.bcv = p1.mlp.bcv = logOR.mlp.bcv = delta.mlp.bcv =
-  p0.svmRadial.bcv = p1.svmRadial.bcv = logOR.svmRadial.bcv = delta.svmRadial.bcv =
-  p0.sl.bcv = p1.sl.bcv = logOR.sl.bcv = delta.sl.bcv =
+  p0.unadjusted.bcv <- p1.unadjusted.bcv <- logOR.unadjusted.bcv <- delta.unadjusted.bcv <-
+  p0.elasticnet.bcv <- p1.elasticnet.bcv <- logOR.elasticnet.bcv <- delta.elasticnet.bcv <-
+  p0.lasso.bcv <- p1.lasso.bcv <- logOR.lasso.bcv <- delta.lasso.bcv <-
+  p0.mlp.bcv <- p1.mlp.bcv <- logOR.mlp.bcv <- delta.mlp.bcv <-
+  p0.svmRadial.bcv <- p1.svmRadial.bcv <- logOR.svmRadial.bcv <- delta.svmRadial.bcv <-
+  p0.sl.bcv <- p1.sl.bcv <- logOR.sl.bcv <- delta.sl.bcv <-
   NA
   
   
@@ -183,36 +187,36 @@ iteration = function(iter)
   for(b in 1:B)
   {
     ### Create the models on the learn sample
-    id = sample(1:N.effectif, size = N.effectif, replace = TRUE)
-    learn = data.obs[id,]
+    id <- sample(1:N.effectif, size = N.effectif, replace = TRUE)
+    learn <- data.obs[id,]
     
     ### Predict the parameters on the remaining observations
-    valid = data.obs[-sort(unique(id)),]
-    valid0 = valid1 = valid
-    valid0$ttt = 0
-    valid1$ttt = 1
+    valid <- data.obs[-sort(unique(id)),]
+    valid0 <- valid1 <- valid
+    valid0$ttt <- 0
+    valid1$ttt <- 1
     
     ### Estimate unadjusted p0 et p1
-    mod.unadjusted = glm(outcome ~ ttt, data = learn, family = binomial(link = "logit"))
+    mod.unadjusted <- glm(outcome ~ ttt, data = learn, family = binomial(link = "logit"))
     
-    p0.unadjusted.bcv[b] = predict(mod.unadjusted, newdata = valid0, type = "response") %>% mean
-    p1.unadjusted.bcv[b] = predict(mod.unadjusted, newdata = valid1, type = "response") %>% mean
-    logOR.unadjusted.bcv[b] = calcul.logOR(p0.unadjusted.bcv[b], p1.unadjusted.bcv[b])
-    delta.unadjusted.bcv[b] = p1.unadjusted.bcv[b] - p0.unadjusted.bcv[b]
+    p0.unadjusted.bcv[b] <- predict(mod.unadjusted, newdata = valid0, type = "response") %>% mean
+    p1.unadjusted.bcv[b] <- predict(mod.unadjusted, newdata = valid1, type = "response") %>% mean
+    logOR.unadjusted.bcv[b] <- calcul.logOR(p0.unadjusted.bcv[b], p1.unadjusted.bcv[b])
+    delta.unadjusted.bcv[b] <- p1.unadjusted.bcv[b] - p0.unadjusted.bcv[b]
     
     ### Preparation for the ML
-    learn.caret = learn
-    learn.caret$outcome[learn.caret$outcome == 1] = "yes"
-    learn.caret$outcome[learn.caret$outcome == 0] = "no"
+    learn.caret <- learn
+    learn.caret$outcome[learn.caret$outcome == 1] <- "yes"
+    learn.caret$outcome[learn.caret$outcome == 0] <- "no"
     learn.caret$outcome <- as.factor(learn.caret$outcome)
 
-    valid.caret = valid
-    valid.caret$outcome[valid.caret$outcome == 1] = "yes"
-    valid.caret$outcome[valid.caret$outcome == 0] = "no"
+    valid.caret <- valid
+    valid.caret$outcome[valid.caret$outcome == 1] <- "yes"
+    valid.caret$outcome[valid.caret$outcome == 0] <- "no"
     valid.caret$outcome <- as.factor(valid.caret$outcome)
-    valid.caret0 = valid.caret1 = valid.caret
-    valid.caret0$ttt = 0
-    valid.caret1$ttt = 1
+    valid.caret0 <- valid.caret1 <- valid.caret
+    valid.caret0$ttt <- 0
+    valid.caret1$ttt <- 1
     
     control <- trainControl(allowParallel = FALSE,
                             verboseIter = FALSE,
@@ -231,10 +235,10 @@ iteration = function(iter)
                             metric = "ROC", trControl = control,
                             family = "binomial", penalty.factor = c(0, rep(1, 78)))
 
-    p0.elasticnet.bcv[b] = mean(predict(object = mod.elasticnet, newdata = valid.caret0,  type = "prob")[,2])
-    p1.elasticnet.bcv[b] = mean(predict(object = mod.elasticnet, newdata = valid.caret1,  type = "prob")[,2])
-    logOR.elasticnet.bcv[b] = calcul.logOR(p0.elasticnet.bcv[b], p1.elasticnet.bcv[b])
-    delta.elasticnet.bcv[b] = p1.elasticnet.bcv[b] - p0.elasticnet.bcv[b]
+    p0.elasticnet.bcv[b] <- mean(predict(object = mod.elasticnet, newdata = valid.caret0,  type = "prob")[,2])
+    p1.elasticnet.bcv[b] <- mean(predict(object = mod.elasticnet, newdata = valid.caret1,  type = "prob")[,2])
+    logOR.elasticnet.bcv[b] <- calcul.logOR(p0.elasticnet.bcv[b], p1.elasticnet.bcv[b])
+    delta.elasticnet.bcv[b] <- p1.elasticnet.bcv[b] - p0.elasticnet.bcv[b]
     
     
     ### Estimate via mlp
@@ -243,10 +247,10 @@ iteration = function(iter)
                       tuneGrid = expand.grid(size = mlp.param$bestTune$size),
                       metric = "ROC", trControl = control)
 
-    p0.mlp.bcv[b] = mean(predict(object = mod.mlp, newdata = valid.caret0,  type = "prob")[,2])
-    p1.mlp.bcv[b] = mean(predict(object = mod.mlp, newdata = valid.caret1,  type = "prob")[,2])
-    logOR.mlp.bcv[b] = calcul.logOR(p0.mlp.bcv[b], p1.mlp.bcv[b])
-    delta.mlp.bcv[b] = p1.mlp.bcv[b] - p0.mlp.bcv[b]
+    p0.mlp.bcv[b] <- mean(predict(object = mod.mlp, newdata = valid.caret0,  type = "prob")[,2])
+    p1.mlp.bcv[b] <- mean(predict(object = mod.mlp, newdata = valid.caret1,  type = "prob")[,2])
+    logOR.mlp.bcv[b] <- calcul.logOR(p0.mlp.bcv[b], p1.mlp.bcv[b])
+    delta.mlp.bcv[b] <- p1.mlp.bcv[b] - p0.mlp.bcv[b]
     
     
     ### Estimate via Lasso (using interactions and splines)
@@ -257,10 +261,10 @@ iteration = function(iter)
                        data = learn.caret, method = 'glmnet',   tuneGrid = expand.grid(alpha=lasso.param$bestTune$alpha, lambda=lasso.param$bestTune$lambda),
                        metric = "ROC", trControl = control, family = "binomial", penalty.factor = c(0, rep(1, 78)) )
 
-    p0.lasso.bcv[b] = mean(predict(object = mod.lasso, newdata = valid.caret0,  type = "prob")[,2])
-    p1.lasso.bcv[b] = mean(predict(object = mod.lasso, newdata = valid.caret1,  type = "prob")[,2])
-    logOR.lasso.bcv[b] = calcul.logOR(p0.lasso.bcv[b], p1.lasso.bcv[b])
-    delta.lasso.bcv[b] = p1.lasso.bcv[b] - p0.lasso.bcv[b]
+    p0.lasso.bcv[b] <- mean(predict(object = mod.lasso, newdata = valid.caret0,  type = "prob")[,2])
+    p1.lasso.bcv[b] <- mean(predict(object = mod.lasso, newdata = valid.caret1,  type = "prob")[,2])
+    logOR.lasso.bcv[b] <- calcul.logOR(p0.lasso.bcv[b], p1.lasso.bcv[b])
+    delta.lasso.bcv[b] <- p1.lasso.bcv[b] - p0.lasso.bcv[b]
     
     
     ### Estimate via svm
@@ -268,10 +272,10 @@ iteration = function(iter)
                             tuneGrid = expand.grid(sigma=svmRadial.param$bestTune$sigma, C = svmRadial.param$bestTune$C),
                             metric = "ROC", trControl = control,  allowParallel = FALSE)
 
-    p0.svmRadial.bcv[b] = mean(predict(object = mod.svmRadial, newdata = valid.caret0,  type = "prob")[,2])
-    p1.svmRadial.bcv[b] = mean(predict(object = mod.svmRadial, newdata = valid.caret1,  type = "prob")[,2])
-    logOR.svmRadial.bcv[b] = calcul.logOR(p0.svmRadial.bcv[b], p1.svmRadial.bcv[b])
-    delta.svmRadial.bcv[b] = p1.svmRadial.bcv[b] - p0.svmRadial.bcv[b]
+    p0.svmRadial.bcv[b] <- mean(predict(object = mod.svmRadial, newdata = valid.caret0,  type = "prob")[,2])
+    p1.svmRadial.bcv[b] <- mean(predict(object = mod.svmRadial, newdata = valid.caret1,  type = "prob")[,2])
+    logOR.svmRadial.bcv[b] <- calcul.logOR(p0.svmRadial.bcv[b], p1.svmRadial.bcv[b])
+    delta.svmRadial.bcv[b] <- p1.svmRadial.bcv[b] - p0.svmRadial.bcv[b]
     
 
     ### Estimate via Superlearner
@@ -294,12 +298,12 @@ iteration = function(iter)
     p0.sl.bcv[b] <- mean(pred.sl.bcv[(N.valid + 1):(2 * N.valid)])
     p1.sl.bcv[b] <- mean(pred.sl.bcv[1:N.valid])
     logOR.sl.bcv[b] <- calcul.logOR(p0 = p0.sl.bcv[b], p1 = p1.sl.bcv[b])
-    delta.sl.bcv[b] = p1.sl.bcv[b] - p0.sl.bcv[b]
+    delta.sl.bcv[b] <- p1.sl.bcv[b] - p0.sl.bcv[b]
     
   }
   
   ### Saving the results of each bootstrap
-  res.iter = data.frame(
+  res.iter <- data.frame(
     iteration = iter,
     n0 = sum(1*I(data.obs$ttt == 0)),
     n1 = sum(1*I(data.obs$ttt == 1)),
@@ -413,17 +417,21 @@ iteration = function(iter)
     sup.delta.sl.bcv = quantile(delta.sl.bcv, probs = 0.975, na.rm = T)
     
   )
+  
   ### Saving the results of all bootstraps for one dataset into a .csv file
-  write.table(res.iter, paste0(path, "/resultats_complex_n", N.effectif, "_ate", Size.Effect, "/", liste[iter], ".csv"), sep = ";", row.names = F)
+  write.table(res.iter, paste0(pathresults, liste[iter], ".csv"), sep = ";", row.names = F)
   return(res.iter)
 }
 
 
 #################################################################
 
+### List all the simulated datasets
+liste <- list.files() %>% as.character #list all 10000 simulated datasets
+
 ### Skipping datasets where the results have already been created
-totlist=1:N.stop
-listmissing = totlist[!totlist %in% as.numeric(gsub(".Rdata.csv","",gsub(paste0("sim_n",N.effectif,"_ate",Size.Effect,"_"),"",list.files(paste0(path, "/resultats_complex_n", N.effectif, "_ate", Size.Effect, "/")))))]
+totlist <- 1:N.stop
+listmissing <- totlist[!totlist %in% as.numeric(gsub(".Rdata.csv","",gsub(paste0("sim_n",N.effectif,"_ate",Size.Effect,"_"),"",list.files(pathresults))))]
 
 
 ### Running the function with parallel processing (highly recommended)

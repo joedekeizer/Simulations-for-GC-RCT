@@ -1,40 +1,43 @@
 #################################################################
-###### Simulations to create the datasets
+###### (1) Simulations to create the data sets
+#################################################################
+### This code will create a folder in the specified work directory named /complex_nXX_ateYY where XX is the sample size (N.effectif) and YY the effect size (Size.Effect)
+### In the folder 10000 simulated data sets will be created and saved as .Rdata, according to the relations described in the sim.base function
 #################################################################
 library(dplyr)
 library(doParallel)
 
 ### Initialization
-path = "/home/Simulations/" #Work directory
-Size.Effect = "log3" #The beta4 coefficient from Supplementary Table A1 for folder names
-sizeEffect = log(3) #Same beta4 coefficient but numeric for the simulations
-N.effectif = 350 #Sample size
-N.stop = 1000 #10k datasets to simulate and save as Rdata (data.obs)
+path <- "/home/Simulations/" #Work directory
+Size.Effect <- "log3" #The beta4 coefficient from Supplementary Table A1 for folder names (character format)
+sizeEffect <- log(3) #Same beta4 coefficient but numeric for the simulations (numeric)
+N.effectif <- 200 #Sample size (numeric)
+N.stop <- 10000 #10k data sets to simulate and save as Rdata (data.obs)
+setwd(path)
 
 ### Parallelisation of the code (PSOCK if Windows and FORK if Linux environment)
-nb.cluster = parallel::detectCores() - 1 #All cores minus one
+nb.cluster <- parallel::detectCores() - 1 #All cores minus one
 if(.Platform[[1]] == "windows") {cl <- makeCluster(nb.cluster, type="PSOCK") } else{ cl <- makeCluster(nb.cluster, type="FORK") }
 registerDoParallel(cl)
 if(.Platform[[1]] == "windows") {clusterEvalQ(cl, {library(dplyr);library(MASS);library(splines);library(caret);library(SuperLearner);library(glmnet);library(cvAUC)})}
 
 
 ### Create the folder for the data if it does not already exist
-pathbases = paste0(path, "/complex_n", N.effectif, "_ate", Size.Effect, "/")
+pathbases <- paste0(path, "/complex_n", N.effectif, "_ate", Size.Effect, "/")
 ifelse(!dir.exists(file.path(pathbases)), dir.create(file.path(pathbases)), FALSE)
-setwd(pathbases)
 
 
 #################################################################
 
 ### Function to simulate the data
-sim.base = function(N, beta1.t, iter)
+sim.base <- function(N, beta1.t, iter)
 {
   ### Coefficient from Supplementary Table A1
-  beta0.x = -0.4
-  beta1.x = log(2)
+  beta0.x <- -0.4
+  beta1.x <- log(2)
   
-  beta0.o = -2
-  beta1.o = log(2)
+  beta0.o <- -2
+  beta1.o <- log(2)
   
   ### Simulated variables from the complex scenario Figure 1
   .x1 <- rnorm(N, 0, 1) #1
@@ -89,11 +92,11 @@ sim.base = function(N, beta1.t, iter)
     beta1.o * 0.5 * data.obs$ttt*data.obs$x18 +
     beta1.t * data.obs$ttt
   
-  pr.o.obs = plogis(bx)
+  pr.o.obs <- plogis(bx)
   
   data.obs$outcome <- rbinom(N, 1, prob = pr.o.obs)
   
-  ### Save each dataset as data.obs in a .Rdata file
+  ### Save each data set as data.obs in a .Rdata file
   save(data.obs, file = paste0(pathbases,"sim_n", N.effectif, "_ate", Size.Effect,"_",formatC(iter, width = 5, format = "d", flag = "0"), ".Rdata"))
   
   return(data.obs)
