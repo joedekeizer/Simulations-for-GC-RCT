@@ -1,13 +1,13 @@
-R codes used in the article titled: G-computation for increasing performances of randomized clinical trials with binary response
+R scripts for data simulation in de Keizer et al. (G-computation for increasing performances of randomized clinical trials with binary response, submitted 2024)
 ================
 
 
 ## Description
 
-In the article G-computation for increasing performances of clinical trials with individual randomization and binary response (DOI. XX), we investigated by simulations the performances of G-computation according to various machine learning algorithms in the context of randomized clinical trials with a 1:1 allocation ratio, a superiority design and binary outcomes. 
-This repository contains all the R code used in the article, organized into four different steps and R scripts. The code is optimized for the Linux environment but is also executable on Windows. To enhance processing speed, parallelization using the `doParallel` package is proposed.
-The provided R scripts contain the code for the complex scenario with n = 200 and mOR = 1.9. At the beginning of each R script, a list of parameters is available for simulating the other complex scenarios shown in the article.
-All analyses were performed using R version 4.3.0.
+We aimed to investigate by simulations the performances of G-computation according to various machine learning algorithms in the context of randomized clinical trials with a 1:1 allocation ratio, a superiority design and binary outcomes. 
+
+
+This repository contains all the R scripts for the complex scenario with sample size $n = 200$ and marginal $mOR = 1.9$. The code is optimized for the Linux environment but is also executable on Windows.  code  At the beginning of each R script, a list of parameters is available for simulating the other complex scenarios shown in the article.
 
 
 ## Data generation
