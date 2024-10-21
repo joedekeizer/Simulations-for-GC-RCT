@@ -53,10 +53,16 @@ To use this script on the simple scenario, the model specifications for both pen
 
 ``` r
 ### Elasticnet for the complex scenario
-elasticnet.param <- train(outcome ~ ttt * (bs(x1, df = 3) + bs(x2, df = 3) + bs(x3, df = 3) + bs(x5, df = 3) + 	x6 + x7 + bs(x8, df = 3) + x9 + bs(x10, df = 3) + bs(x11, df = 3) + x12 + bs(x14, df = 3) + bs(x15, df = 3) +	bs(x18, df = 3) + x19 + x20 + bs(x21, df = 3)), data = base.train, 	method = 'glmnet',  tuneLength = 20, metric = "ROC", trControl = control, 	family = "binomial", penalty.factor = c(0, rep(1, 78)))
+elasticnet.param <- train(outcome ~ ttt * (bs(x1, df = 3) + bs(x2, df = 3) + bs(x3, df = 3) +
+ bs(x5, df = 3) + 	x6 + x7 + bs(x8, df = 3) + x9 + bs(x10, df = 3) + bs(x11, df = 3) +
+ x12 + bs(x14, df = 3) + bs(x15, df = 3) +	bs(x18, df = 3) + x19 + x20 + bs(x21, df = 3)),
+ data = base.train, 	method = 'glmnet',  tuneLength = 20, metric = "ROC", trControl = control,
+ family = "binomial", penalty.factor = c(0, rep(1, 78)))
 
 ### Elasticnet for the simple scenario
-elasticnet.param <- train(outcome ~ ttt * (bs(x1, df = 3) + bs(x2, df = 3) + bs(x3, df = 3) + x4 + x5 + x6), data = base.train, method = 'glmnet',  tuneLength = 20, metric = "ROC", trControl = control, family = "binomial", penalty.factor = c(0,rep(1,24)))
+elasticnet.param <- train(outcome ~ ttt * (bs(x1, df = 3) + bs(x2, df = 3) + bs(x3, df = 3) +
+ x4 + x5 + x6), data = base.train, method = 'glmnet',  tuneLength = 20, metric = "ROC",
+ trControl = control, family = "binomial", penalty.factor = c(0,rep(1,24)))
 ``` 		   
 
 This R script has a long processing time, so parallel processing is highly recommended. The code was written to allow for stopping and resuming execution from where it was left off.
@@ -71,9 +77,9 @@ The fourth R script `4_read_sims.R` contains the functions necessary to compute 
 
 ## Supplementary tables
 
-|  |   |   |  
+
+| **Variable** | **Role in the study**  | **Distribution**  |
 | :- | :--- | :-------- |
-| **Variable** | **Role in the study**  | **Distribution**  |   
 $X_1$   |  Continuous   covariate   |  $N (0,1)$     | 
 $X_2$   |  Continuous    covariate  |       $N (0,1)$   | 
 $X_3$    |  Continuous  covariate   |       $N (0,1)$    | 
@@ -82,5 +88,4 @@ $X_5$   | Binary   covariate   |        $1 \{ N (0,1)< 0.67  \}$  (i.e., prevale
 $X_6$   |  Binary   covariate   |      ${1}  \{ N (0,1)< 0.67  \}$  (i.e., prevalence $\sim$ 75\%)   | 
 $A$  | Binary treatment arm    |     ${1}  \{ N (0,1)> 0  \}$  (i.e., a 1:1 randomized clinical trial)  | 
 $Y$  | Binary outcome  |  $B ( n, p =  logistic \; (  \beta_0 + \beta_1  \times X_1 + \beta_1  \times X_2 + \beta_1  \times X_4 + \beta_1  \times X_5 +   \beta_2 \times A  )   )$   |
-|  |   |   |  
 : A2-Model used for the simulations in the simple scenario

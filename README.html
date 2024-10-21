@@ -443,10 +443,16 @@ estimates. See R code below with an example for obtaining the tuning
 parameters for the Elasticnet model in both the complex and the simple
 scenario.</p>
 <pre class="r"><code>### Elasticnet for the complex scenario
-elasticnet.param &lt;- train(outcome ~ ttt * (bs(x1, df = 3) + bs(x2, df = 3) + bs(x3, df = 3) + bs(x5, df = 3) +  x6 + x7 + bs(x8, df = 3) + x9 + bs(x10, df = 3) + bs(x11, df = 3) + x12 + bs(x14, df = 3) + bs(x15, df = 3) +   bs(x18, df = 3) + x19 + x20 + bs(x21, df = 3)), data = base.train,  method = &#39;glmnet&#39;,  tuneLength = 20, metric = &quot;ROC&quot;, trControl = control,   family = &quot;binomial&quot;, penalty.factor = c(0, rep(1, 78)))
+elasticnet.param &lt;- train(outcome ~ ttt * (bs(x1, df = 3) + bs(x2, df = 3) + bs(x3, df = 3) +
+ bs(x5, df = 3) +   x6 + x7 + bs(x8, df = 3) + x9 + bs(x10, df = 3) + bs(x11, df = 3) +
+ x12 + bs(x14, df = 3) + bs(x15, df = 3) +  bs(x18, df = 3) + x19 + x20 + bs(x21, df = 3)),
+ data = base.train,     method = &#39;glmnet&#39;,  tuneLength = 20, metric = &quot;ROC&quot;, trControl = control,
+ family = &quot;binomial&quot;, penalty.factor = c(0, rep(1, 78)))
 
 ### Elasticnet for the simple scenario
-elasticnet.param &lt;- train(outcome ~ ttt * (bs(x1, df = 3) + bs(x2, df = 3) + bs(x3, df = 3) + x4 + x5 + x6), data = base.train, method = &#39;glmnet&#39;,  tuneLength = 20, metric = &quot;ROC&quot;, trControl = control, family = &quot;binomial&quot;, penalty.factor = c(0,rep(1,24)))</code></pre>
+elasticnet.param &lt;- train(outcome ~ ttt * (bs(x1, df = 3) + bs(x2, df = 3) + bs(x3, df = 3) +
+ x4 + x5 + x6), data = base.train, method = &#39;glmnet&#39;,  tuneLength = 20, metric = &quot;ROC&quot;,
+ trControl = control, family = &quot;binomial&quot;, penalty.factor = c(0,rep(1,24)))</code></pre>
 <p>This R script has a long processing time, so parallel processing is
 highly recommended. The code was written to allow for stopping and
 resuming execution from where it was left off.</p>
@@ -469,62 +475,59 @@ scenario</caption>
 <col width="26%" />
 <col width="60%" />
 </colgroup>
+<thead>
+<tr class="header">
+<th align="left"><strong>Variable</strong></th>
+<th align="left"><strong>Role in the study</strong></th>
+<th align="left"><strong>Distribution</strong></th>
+</tr>
+</thead>
 <tbody>
 <tr class="odd">
-<td align="left"><strong>Variable</strong></td>
-<td align="left"><strong>Role in the study</strong></td>
-<td align="left"><strong>Distribution</strong></td>
-</tr>
-<tr class="even">
 <td align="left"><span class="math inline">\(X_1\)</span></td>
 <td align="left">Continuous covariate</td>
 <td align="left"><span class="math inline">\(N (0,1)\)</span></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><span class="math inline">\(X_2\)</span></td>
 <td align="left">Continuous covariate</td>
 <td align="left"><span class="math inline">\(N (0,1)\)</span></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><span class="math inline">\(X_3\)</span></td>
 <td align="left">Continuous covariate</td>
 <td align="left"><span class="math inline">\(N (0,1)\)</span></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><span class="math inline">\(X_4\)</span></td>
 <td align="left">Continuous covariate</td>
 <td align="left"><span class="math inline">\(1 \{ N (0,1)&lt;
 -0.67  \}\)</span> (i.e., prevalence <span class="math inline">\(\sim\)</span> 25%)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><span class="math inline">\(X_5\)</span></td>
 <td align="left">Binary covariate</td>
 <td align="left"><span class="math inline">\(1 \{ N (0,1)&lt;
 0.67  \}\)</span> (i.e., prevalence <span class="math inline">\(\sim\)</span> 50%)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><span class="math inline">\(X_6\)</span></td>
 <td align="left">Binary covariate</td>
 <td align="left"><span class="math inline">\({1}  \{ N (0,1)&lt;
 0.67  \}\)</span> (i.e., prevalence <span class="math inline">\(\sim\)</span> 75%)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left"><span class="math inline">\(A\)</span></td>
 <td align="left">Binary treatment arm</td>
 <td align="left"><span class="math inline">\({1}  \{ N (0,1)&gt;
 0  \}\)</span> (i.e., a 1:1 randomized clinical trial)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left"><span class="math inline">\(Y\)</span></td>
 <td align="left">Binary outcome</td>
 <td align="left"><span class="math inline">\(B ( n, p =  logistic \;
 (  \beta_0 + \beta_1  \times X_1 + \beta_1  \times X_2 + \beta_1  \times
 X_4 + \beta_1  \times X_5 +   \beta_2 \times A  )   )\)</span></td>
-</tr>
-<tr class="even">
-<td align="left"></td>
-<td align="left"></td>
-<td align="left"></td>
 </tr>
 </tbody>
 </table>
