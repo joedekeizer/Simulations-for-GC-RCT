@@ -1,10 +1,10 @@
-#################################################################
+################################################################################
 ###### (3) Applying the different methods on the simulated data
-#################################################################
+################################################################################
 ### This code will create a folder in the specified work directory named /results_complex_nXX_ateYY where XX is the sample size (N.effectif) and YY the effect size (Size.Effect)
 ### In the folder it will create a .csv file with the results of all the employed methods on the simulated data
 ### Paralellization is highly recommended to reduce the processing time, the code is written so that it saves the progress as it runs with the possibility to pause and resume (skip data already with results)
-#################################################################
+################################################################################
 library(dplyr)
 library(MASS)
 library(splines)
@@ -14,14 +14,23 @@ library(glmnet)
 library(doParallel)
 library(cvAUC)
 
-### Initialization
-path <- "/home/Simulations/" #Work directory containing the folder with the simulated datasets
-Size.Effect <- "log3" #The beta4 coefficient from Supplementary Table A1 (character format)
-N.effectif <- 200 #Sample size (numeric)
-N.stop <- 10000 #10k datasets to simulate and save as Rdata (data.obs)
-B <- 500 #This is 500 for the simulations
-V.crossvalid <- 20 #Number of crossvalidations
+### Initialization of the parameters
+SizeEffect <- "log(3)" #The size effect (character)
+N.effectif <- 200 #The sample size (numeric)
+N.stop <- 10000 #The number of simulated data sets (numeric)
+B <- 500 #The number of bootstrap samples
+V.crossvalid <- 20 #The number of cross-validations
+path <- "/home/Simulations/" #Work directory
+
+
+### Setting the work directory to the folder with the simulated datasets
+Size.Effect <- gsub("[[:punct:]]", "", SizeEffect) #Removing any special character for folder name
 setwd(paste0(path, "/complex_n", N.effectif, "_ate", Size.Effect, "/")) #set to work directory to the location of the simulated data
+
+
+### Create the folder for the results if it does not already exist in the work directory
+pathresults <- paste0(path, "results_complex_n", N.effectif, "_ate", Size.Effect, "/")
+ifelse(!dir.exists(file.path(pathresults)), dir.create(file.path(pathresults)), FALSE)
 
 
 ### Parallelisation of the code (PSOCK if Windows and FORK if Linux environment)
@@ -29,11 +38,6 @@ nb.cluster <- parallel::detectCores() - 1 #All cores minus one
 if(.Platform[[1]] == "windows") {cl <- makeCluster(nb.cluster, type="PSOCK") } else{ cl <- makeCluster(nb.cluster, type="FORK") }
 registerDoParallel(cl)
 if(.Platform[[1]] == "windows") {clusterEvalQ(cl, {library(dplyr);library(MASS);library(splines);library(caret);library(SuperLearner);library(glmnet);library(cvAUC)})}
-
-
-### Create the folder for the results if it does not already exist
-pathresults <- paste0(path, "results_complex_n", N.effectif, "_ate", Size.Effect, "/")
-ifelse(!dir.exists(file.path(pathresults)), dir.create(file.path(pathresults)), FALSE)
 
 
 ################################################################################
@@ -424,7 +428,7 @@ iteration <- function(iter)
 }
 
 
-#################################################################
+################################################################################
 
 ### List all the simulated datasets
 liste <- list.files() %>% as.character #list all 10000 simulated datasets

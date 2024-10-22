@@ -1,18 +1,17 @@
-#################################################################
+################################################################################
 ###### (2) Estimate theoretical values of marginal effects
-#################################################################
+################################################################################
 ### This code will create one .Rdata file in the specified work directory
 ### The file will contain 1000000 estimates of the outcomes (p0 and p1) for each treatment group, along with the corresponding logOR and delta values
-#################################################################
+################################################################################
 library(dplyr)
 library(doParallel)
 
-### Initialization
+### Initialization of the parameters
+SizeEffect <- "log(3)" #The size effect (character)
+N.effectif <- 200 #The sample size (numeric)
+N.stop <- 1000000 #The number of simulated data sets (numeric)
 path <- "/home/Simulations/" #Work directory
-Size.Effect <- "log3" #The beta4 coefficient from Supplementary Table A1 for folder names (character format)
-sizeEffect <- log(3) #Same beta4 coefficient but numeric for the simulations (numeric)
-N.effectif <- 200 #Sample size (numeric)
-N.stop <- 1000000 #1 million data sets to simulate
 setwd(path)
 
 
@@ -23,7 +22,7 @@ registerDoParallel(cl)
 if(.Platform[[1]] == "windows") {clusterEvalQ(cl, {library(dplyr);library(MASS);library(splines);library(caret);library(SuperLearner);library(glmnet);library(cvAUC)})}
 
 
-#################################################################
+################################################################################
 
 ### Function to simulate data; same as the sim_bases.R file without saving the data
 sim.base <- function(N, beta1.t, iter)
@@ -123,18 +122,23 @@ res.sim <- function(i, data.obs)
 }
 
 
-#################################################################
+################################################################################
+
+### Fixing SizeEffect for folder name and setting to numeric
+Size.Effect <- gsub("[[:punct:]]", "", SizeEffect) #Removing any special character for folder name
+SizeEffect <- eval(parse(text = SizeEffect)) #Setting to numeric
+
 
 ### Running the function with parallel processing (not necessary but recommended)
 if(.Platform[[1]] == "windows") {
   ### Windows
   res <- foreach(i = 1:N.stop, .combine = rbind,  .inorder = FALSE, .verbose = T,
           .packages = c("dplyr")
-  ) %dopar% {res.sim(i, data.obs = sim.base(N = N.effectif, beta1.t = sizeEffect))}
+  ) %dopar% {res.sim(i, data.obs = sim.base(N = N.effectif, beta1.t = SizeEffect))}
 } else {
   ### Linux
   res <- foreach(i = 1:N.stop, .combine = rbind,  .inorder = FALSE, .verbose = T
-  ) %dopar% {res.sim(i, data.obs = sim.base(N = N.effectif, beta1.t = sizeEffect))}
+  ) %dopar% {res.sim(i, data.obs = sim.base(N = N.effectif, beta1.t = SizeEffect))}
 }
 
 stopCluster(cl)

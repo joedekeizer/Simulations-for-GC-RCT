@@ -1,19 +1,26 @@
-#################################################################
+################################################################################
 ###### (1) Simulations to create the data sets
-#################################################################
+################################################################################
 ### This code will create a folder in the specified work directory named /complex_nXX_ateYY where XX is the sample size (N.effectif) and YY the effect size (Size.Effect)
 ### In the folder 10000 simulated data sets will be created and saved as .Rdata, according to the relations described in the sim.base function
-#################################################################
+################################################################################
 library(dplyr)
 library(doParallel)
 
-### Initialization
+### Initialization of the parameters
+SizeEffect <- "log(3)" #The size effect (character)
+N.effectif <- 200 #The sample size (numeric)
+N.stop <- 10000 #The number of simulated data sets (numeric)
 path <- "/home/Simulations/" #Work directory
-Size.Effect <- "log3" #The beta4 coefficient from Supplementary Table A1 for folder names (character format)
-sizeEffect <- log(3) #Same beta4 coefficient but numeric for the simulations (numeric)
-N.effectif <- 200 #Sample size (numeric)
-N.stop <- 10000 #10k data sets to simulate and save as Rdata (data.obs)
 setwd(path)
+
+
+### Create the folder for the data if it does not already exist
+Size.Effect <- gsub("[[:punct:]]", "", SizeEffect) #Removing any special character for folder name
+SizeEffect <- eval(parse(text = SizeEffect)) #Setting to numeric
+pathbases <- paste0(path, "/complex_n", N.effectif, "_ate", Size.Effect, "/")
+ifelse(!dir.exists(file.path(pathbases)), dir.create(file.path(pathbases)), FALSE)
+
 
 ### Parallelisation of the code (PSOCK if Windows and FORK if Linux environment)
 nb.cluster <- parallel::detectCores() - 1 #All cores minus one
@@ -22,12 +29,7 @@ registerDoParallel(cl)
 if(.Platform[[1]] == "windows") {clusterEvalQ(cl, {library(dplyr);library(MASS);library(splines);library(caret);library(SuperLearner);library(glmnet);library(cvAUC)})}
 
 
-### Create the folder for the data if it does not already exist
-pathbases <- paste0(path, "/complex_n", N.effectif, "_ate", Size.Effect, "/")
-ifelse(!dir.exists(file.path(pathbases)), dir.create(file.path(pathbases)), FALSE)
-
-
-#################################################################
+################################################################################
 
 ### Function to simulate the data
 sim.base <- function(N, beta1.t, iter)
@@ -103,7 +105,7 @@ sim.base <- function(N, beta1.t, iter)
 }
 
 
-#################################################################
+################################################################################
 
 ### Running the function with parallel processing (not necessary but recommended)
 if(.Platform[[1]] == "windows") {
@@ -111,11 +113,11 @@ if(.Platform[[1]] == "windows") {
   foreach(i = 1:N.stop,  .inorder = FALSE, .verbose = T,
           .export=ls(envir=globalenv()),
           .packages = c("dplyr")
-  ) %dopar% {sim.base(N = N.effectif, beta1.t = sizeEffect, iter = i)}
+  ) %dopar% {sim.base(N = N.effectif, beta1.t = SizeEffect, iter = i)}
 } else {
   ### Linux
   foreach(i = 1:N.stop,  .inorder = FALSE, .verbose = T
-  ) %dopar% {sim.base(N = N.effectif, beta1.t = sizeEffect, iter = i)}
+  ) %dopar% {sim.base(N = N.effectif, beta1.t = SizeEffect, iter = i)}
 }
 
 stopCluster(cl)

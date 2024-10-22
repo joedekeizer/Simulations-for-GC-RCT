@@ -1,20 +1,23 @@
-#################################################################
+################################################################################
 ###### (4) Summarize the estimated results
-#################################################################
+################################################################################
 ### This code summarizes the results from the different methods on the 10000 simulated datasets into a table format (used to create Tables 1 and 2)
 ### It will save a .tex file (Latex) named Latex_complex_nXX_ateYY in the specified work directory where XX is the sample size (N.effectif) and YY the effect size (Size.Effect)
-#################################################################
+################################################################################
 library(dplyr)
 library(stringr)
 library(purrr)
 library(xtable)
 
-### Initialization
-path <- "/home/Simulations/" #Work directory containing the .Rdata file with the theoretical estimates and the folder with the results
-Size.Effect <- "log3" #The beta4 coefficient from Supplementary Table A1 (character format)
-N.effectif <- 200 #Sample size (numeric)
+### Initialization of the parameters
+SizeEffect <- "log(3)" #The size effect (character)
+N.effectif <- 200 #The sample size (numeric)
+path <- "/home/Simulations/" #Work directory
+path <- "C:\\Users\\Joe\\Documents\\GitHub\\Simulations-for-GC-RCT2\\" #Work directory
 setwd(path)
 
+
+################################################################################
 
 ### Functions used for calculating the different performance criteria (formulas detailed in the supplementary material)
 calcul.esd <- function(mean.parameter, estimand)
@@ -53,10 +56,8 @@ calcul.rss <- function(mean.parameter, sd.parameter, mean.parameter.unadjusted, 
 }
 
 
-
-
-
 ### Load the theoretical estimates used to calculate bias for the different methods
+Size.Effect <- gsub("[[:punct:]]", "", SizeEffect) #Removing any special character for folder name
 load(paste0("res_n", N.effectif, "_ate", Size.Effect, ".Rdata"))
 res_final <- res
 res_final <- res_final[!(res_final$logOR=="-Inf" | res_final$logOR=="Inf"),] #In the very rare case where p0 = 0 or p1 = 1
@@ -194,6 +195,9 @@ dfl[,7] <- paste0(sprintf("%.2f", dfl[,7]), "%")
 dfl[,8] <- paste0(sprintf("%.2f", dfl[,8]), "%")
 dfl[,9] <- paste0(sprintf("%.2f", dfl[,9]), "%")
 dfl[,10] <- paste0(sprintf("%.2f", dfl[,10]), "%")
+
+
+################################################################################
 
 ### Table with all the results for the specific scenario
 print(dfl)
