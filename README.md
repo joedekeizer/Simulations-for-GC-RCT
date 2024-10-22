@@ -85,20 +85,20 @@ The fourth R script `4_read_sims.R` contains the functions necessary to compute 
 | $X_2$        | Continuous covariate  | $\mathcal{N}(\beta_0 + \beta_1 \times X_1, 1)$               |
 | $X_3$        | Continuous covariate  | $\mathcal{N}(\beta_0 - \beta_1 \times X_1 - \beta_2 \times X_2, 1)$               |
 | $X_4$        | Continuous covariate  | $\mathcal{N}(0, 1)$               |
-| $X_5$        | Binary covariate      | $\mathbf{1}\{\mathcal{N}(0, 1) > 0.67\}$ (i.e., prevalence $\sim$ 25\%)              |
-| $X_6$        | Binary covariate      | $\mathbf{1}\{\mathcal{N}(\beta_0 - \beta_1 \times X_4, 1) > -0.40\}$ (i.e., prevalence $\sim$ 50\%)         |
+| $X_5$        | Binary covariate      | $`\mathbf{1}\{\mathcal{N}(0, 1) > 0.67\}`$ (i.e., prevalence $\sim$ 25\%)              |
+| $X_6$        | Binary covariate      | $`\mathbf{1}\{\mathcal{N}(\beta_0 - \beta_1 \times X_4, 1) > -0.40\}`$ (i.e., prevalence $\sim$ 50\%)         |
 | $X_7$        | Continuous covariate  | $\mathcal{N}(\beta_0 - \beta_1 \times X_5, 1)$         |
-| $X_8$        | Binary covariate      | $\mathbf{1}\{\mathcal{N}(\beta_0 + \beta_1 \times X_6, 1) > -0.80\}$ (i.e., prevalence $\sim$ 75\%)    |
+| $X_8$        | Binary covariate      | $`\mathbf{1}\{\mathcal{N}(\beta_0 + \beta_1 \times X_6, 1) > -0.80\}`$ (i.e., prevalence $\sim$ 75\%)    |
 | $X_9$        | Continuous covariate  | $\mathcal{N}(\beta_0 + \beta_1 \times X_7, 1)$  |
 | $X_{10}$     | Continuous covariate  | $\mathcal{N}(0, 1)$ |
-| $X_{11}$     | Binary covariate      | $\mathbf{1}\{\mathcal{N}(\beta_0 + \beta_1 \times X_8, 1) > 0.84\}$ (i.e., prevalence $\sim$ 25\%)  |
+| $X_{11}$     | Binary covariate      | $`\mathbf{1}\{\mathcal{N}(\beta_0 + \beta_1 \times X_8, 1) > 0.84\}`$ (i.e., prevalence $\sim$ 25\%)  |
 | $X_{12}$     | Continuous covariate  | $\mathcal{N}(\beta_0 - \beta_1 \times X_{11} - \beta_2 \times X_{10}, 1)$ |
 | $X_{13}$     | Continuous covariate  | $\mathcal{N}(\beta_0 - \beta_1 \times X_{11}, 1)$ |
 | $X_{14}$     | Continuous covariate  | $\mathcal{N}(0, 1)$ |
-| $X_{15}$     | Binary covariate      | $\mathbf{1}\{\mathcal{N}(0, 1) > 0.67\}$ (i.e., prevalence $\sim$ 25\%)  |
-| $X_{16}$     | Binary covariate      | $\mathbf{1}\{\mathcal{N}(0, 1) > 0.67\}$ (i.e., prevalence $\sim$ 25\%)  |
+| $X_{15}$     | Binary covariate      | $`\mathbf{1}\{\mathcal{N}(0, 1) > 0.67\}`$ (i.e., prevalence $\sim$ 25\%)  |
+| $X_{16}$     | Binary covariate      | $`\mathbf{1}\{\mathcal{N}(0, 1) > 0.67\}`$ (i.e., prevalence $\sim$ 25\%)  |
 | $X_{17}$     | Continuous covariate  | $\mathcal{N}(0, 1)$    | 
-| $A$          | Binary treatment arm  | $\mathbf{1}\{\mathcal{N}(0, 1) > 0\}$ (i.e., a 1:1 randomized clinical trial)   |
+| $A$          | Binary treatment arm  | $`\mathbf{1}\{\mathcal{N}(0, 1) > 0\}`$ (i.e., a 1:1 randomized clinical trial)   |
 | $Y$ | Binary outcome | $\mathcal{B}\big(n, p = \text{logistic}\big(\beta_2 + \beta_3 \times \mathbf{1}{X_{2} > -0.44} - \beta_3 \times X_3 + (\beta_3 / 2) \times X_3^2 + \beta_3 \times X_5 + \beta_3 \times X_6 + \beta_3 \times X_9 + (\beta_3 / 2) \times X_{10}^2 - \beta_3 \times X_{12} - \beta_3 \times (X_{13} > -0.55) + \beta_3 \times X_{14} + \beta_3 \times X_{15} + (\beta_3 / 2) \times A \times X_{14} + \beta_4 \times A \big)\big)$ |
 <!--| $Y$          | Binary outcome        | $\mathcal{B}\big(n, p = \text{logistic}\big(\beta_2 + \beta_3 \times \mathbf{1}\{X_{2} > -0.44\} - \beta_3 \times X_3 + (\beta_3 / 2) \times X_3^2$ |
 |              |                       | $+ \beta_3 \times X_5 + \beta_3 \times X_6 + \beta_3 \times X_9 + (\beta_3 / 2) \times X_{10}^2 - \beta_3 \times X_{12}$ |
@@ -106,7 +106,7 @@ The fourth R script `4_read_sims.R` contains the functions necessary to compute 
 
 
 **Notes**:
-$\mathbf{1}\{ a \} = 1$ if the condition $a$ is true and 0 otherwise; $\mathcal{N}(\mu, \sigma)$ represents a Gaussian distribution with mean at $\mu$ and standard deviation at $\sigma$; $\mathcal{B}(n, p)$ represents a Binomial distribution with size $n$ and probability of success $p$.
+$`\mathbf{1}\{ a \} = 1`$ if the condition $a$ is true and 0 otherwise; $\mathcal{N}(\mu, \sigma)$ represents a Gaussian distribution with mean at $\mu$ and standard deviation at $\sigma$; $\mathcal{B}(n, p)$ represents a Binomial distribution with size $n$ and probability of success $p$.
 The regression coefficients were: $\beta_0 = -0.4$, $\beta_1 = \log(2)$, $\beta_2 = -2$, $\beta_3 = \log(2)$, and $\beta_4 = \log(3), \log(1.5), \log(0.9729)$ to obtain mOR values of 1.9, 1.3, and 1.0 respectively.
 
 
@@ -119,14 +119,14 @@ The regression coefficients were: $\beta_0 = -0.4$, $\beta_1 = \log(2)$, $\beta_
 | $X_1$        | Continuous covariate  | $\mathcal{N}(0, 1)$          |
 | $X_2$        | Continuous covariate  | $\mathcal{N}(0, 1)$          |
 | $X_3$        | Continuous covariate  | $\mathcal{N}(0, 1)$          |
-| $X_4$        | Continuous covariate  | $\mathbf{1}\{\mathcal{N}(0, 1) < -0.67\}$ (i.e., prevalence $\sim$ 25\%) |
-| $X_5$        | Binary covariate      | $\mathbf{1}\{\mathcal{N}(0, 1) < 0.67\}$ (i.e., prevalence $\sim$ 50\%) |
-| $X_6$        | Binary covariate      | $\mathbf{1}\{\mathcal{N}(0, 1) < 0.67\}$ (i.e., prevalence $\sim$ 75\%) |
-| $A$          | Binary treatment arm  | $\mathbf{1}\{\mathcal{N}(0, 1) > 0\}$ (i.e., a 1:1 randomized clinical trial) |
+| $X_4$        | Continuous covariate  | $`\mathbf{1}\{\mathcal{N}(0, 1) < -0.67\}`$ (i.e., prevalence $\sim$ 25\%) |
+| $X_5$        | Binary covariate      | $`\mathbf{1}\{\mathcal{N}(0, 1) < 0.67\}`$ (i.e., prevalence $\sim$ 50\%) |
+| $X_6$        | Binary covariate      | $`\mathbf{1}\{\mathcal{N}(0, 1) < 0.67\}`$ (i.e., prevalence $\sim$ 75\%) |
+| $A$          | Binary treatment arm  | $`\mathbf{1}\{\mathcal{N}(0, 1) > 0\}`$ (i.e., a 1:1 randomized clinical trial) |
 | $Y$          | Binary outcome        | $\mathcal{B}\big( n, p = \text{logistic} \big(  \beta_0 + \beta_1  \times X_1 + \beta_1  \times X_2 + \beta_1  \times X_4 + \beta_1  \times X_5 +   \beta_2 \times A    \big )  \big )$ |
 
 **Notes**:
-$\mathbf{1}\{  a \} = 1$ if the condition $a$ is true and 0 otherwise;  $\mathcal{N} (\mu,\sigma)$ represents a Gaussian distribution with mean $\mu$ and standard deviation $\sigma$; $\mathcal{B} (n,p)$ represents a Binomial distribution with a size $n$ and probability of success  $p$.  
+$`\mathbf{1}\{  a \} = 1`$ if the condition $a$ is true and 0 otherwise;  $\mathcal{N} (\mu,\sigma)$ represents a Gaussian distribution with mean $\mu$ and standard deviation $\sigma$; $\mathcal{B} (n,p)$ represents a Binomial distribution with a size $n$ and probability of success  $p$.  
 The regression coefficients were: $\beta_0 = -3$,   $\beta_1 = \log(4)$  and $\beta_2 = \log(3), \log(1.5), \log(1)$ to obtain mOR values of 1.9, 1.3, 1.0 respectively.
 For the simple scenario with reduced predictive performance the regression coefficients were: $\beta_0 = -0.6$,   $\beta_1 = 0.2$  and $\beta_2 = \log(3), \log(1.5), \log(1)$ to obtain mOR values of 3.0, 1.5, 1.0 respectively.
 
