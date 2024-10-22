@@ -99,9 +99,10 @@ The fourth R script `4_read_sims.R` contains the functions necessary to compute 
 | $X_{16}$     | Binary covariate      | $\mathbf{1}\{\mathcal{N}(0, 1) > 0.67\}$ (i.e., prevalence $\sim$ 25\%)  |
 | $X_{17}$     | Continuous covariate  | $\mathcal{N}(0, 1)$    | 
 | $A$          | Binary treatment arm  | $\mathbf{1}\{\mathcal{N}(0, 1) > 0\}$ (i.e., a 1:1 randomized clinical trial)   |
-| $Y$          | Binary outcome        | $\mathcal{B}\big(n, p = \text{logistic}\big(\beta_2 + \beta_3 \times \mathbf{1}\{X_{2} > -0.44\} - \beta_3 \times X_3 + (\beta_3 / 2) \times X_3^2$ |
+| $Y$ | Binary outcome | $\mathcal{B}\big(n, p = \text{logistic}\big(\beta_2 + \beta_3 \times \mathbf{1}{X_{2} > -0.44} - \beta_3 \times X_3 + (\beta_3 / 2) \times X_3^2 + \beta_3 \times X_5 + \beta_3 \times X_6 + \beta_3 \times X_9 + (\beta_3 / 2) \times X_{10}^2 - \beta_3 \times X_{12} - \beta_3 \times (X_{13} > -0.55) + \beta_3 \times X_{14} + \beta_3 \times X_{15} + (\beta_3 / 2) \times A \times X_{14} + \beta_4 \times A \big)\big)$ |
+<!--| $Y$          | Binary outcome        | $\mathcal{B}\big(n, p = \text{logistic}\big(\beta_2 + \beta_3 \times \mathbf{1}\{X_{2} > -0.44\} - \beta_3 \times X_3 + (\beta_3 / 2) \times X_3^2$ |
 |              |                       | $+ \beta_3 \times X_5 + \beta_3 \times X_6 + \beta_3 \times X_9 + (\beta_3 / 2) \times X_{10}^2 - \beta_3 \times X_{12}$ |
-|              |                       | $- \beta_3 \times (X_{13} > -0.55) + \beta_3 \times X_{14} + \beta_3 \times X_{15} + (\beta_3 / 2) \times A \times X_{14} + \beta_4 \times A \big)\big)$ |
+|              |                       | $- \beta_3 \times (X_{13} > -0.55) + \beta_3 \times X_{14} + \beta_3 \times X_{15} + (\beta_3 / 2) \times A \times X_{14} + \beta_4 \times A \big)\big)$ | -->
 
 
 **Notes**:
