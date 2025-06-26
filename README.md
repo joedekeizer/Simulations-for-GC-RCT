@@ -106,7 +106,7 @@ The fourth R script `4_read_sims.R` contains the functions necessary to compute 
 
 
 **Notes**:
-$`\mathbf{1}\{ a \} = 1`$ if the condition $a$ is true and 0 otherwise; $\mathcal{N}(\mu, \sigma)$ represents a Gaussian distribution with mean at $\mu$ and standard deviation at $\sigma$; $\mathcal{B}(n, p)$ represents a Binomial distribution with size $n$ and probability of success $p$.
+$`\mathbf{1}\{ a \} = 1`$ if the condition $a$ is true and 0 otherwise; $\mathcal{N}(\mu, \sigma)$ represents a Gaussian distribution with mean at $\mu$ and standard deviation at $\sigma$; $\mathcal{B}(n, p)$ represents a Binomial distribution with size $n=1$ and probability of success $p$.
 The regression coefficients were: $\beta_0 = -0.4$, $\beta_1 = \log(2)$, $\beta_2 = -2$, $\beta_3 = \log(2)$, and $\beta_4 = \log(3), \log(1.5), \log(0.9729)$ to obtain mOR values of 1.9, 1.3, and 1.0 respectively.
 
 
@@ -126,7 +126,7 @@ The regression coefficients were: $\beta_0 = -0.4$, $\beta_1 = \log(2)$, $\beta_
 | $Y$          | Binary outcome        | $\mathcal{B}\big( n, p = \text{logistic} \big(  \beta_0 + \beta_1  \times X_1 + \beta_1  \times X_2 + \beta_1  \times X_4 + \beta_1  \times X_5 +   \beta_2 \times A    \big )  \big )$ |
 
 **Notes**:
-$`\mathbf{1}\{  a \} = 1`$ if the condition $a$ is true and 0 otherwise;  $\mathcal{N} (\mu,\sigma)$ represents a Gaussian distribution with mean $\mu$ and standard deviation $\sigma$; $\mathcal{B} (n,p)$ represents a Binomial distribution with a size $n$ and probability of success  $p$.  
+$`\mathbf{1}\{  a \} = 1`$ if the condition $a$ is true and 0 otherwise;  $\mathcal{N} (\mu,\sigma)$ represents a Gaussian distribution with mean $\mu$ and standard deviation $\sigma$; $\mathcal{B} (n,p)$ represents a Binomial distribution with a size $n=1$ and probability of success  $p$.  
 The regression coefficients were: $\beta_0 = -3$,   $\beta_1 = \log(4)$  and $\beta_2 = \log(3), \log(1.5), \log(1)$ to obtain mOR values of 1.9, 1.3, 1.0 respectively.
 For the simple scenario with reduced predictive performance the regression coefficients were: $\beta_0 = -0.6$,   $\beta_1 = 0.2$  and $\beta_2 = \log(3), \log(1.5), \log(1)$ to obtain mOR values of 3.0, 1.5, 1.0 respectively.
 
