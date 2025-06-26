@@ -119,8 +119,8 @@ The regression coefficients were: $\beta_0 = -0.4$, $\beta_1 = \log(2)$, $\beta_
 | $X_1$        | Continuous covariate  | $\mathcal{N}(0, 1)$          |
 | $X_2$        | Continuous covariate  | $\mathcal{N}(0, 1)$          |
 | $X_3$        | Continuous covariate  | $\mathcal{N}(0, 1)$          |
-| $X_4$        | Continuous covariate  | $`\mathbf{1}\{\mathcal{N}(0, 1) < -0.67\}`$ (i.e., prevalence $\sim$ 25\%) |
-| $X_5$        | Binary covariate      | $`\mathbf{1}\{\mathcal{N}(0, 1) < 0.67\}`$ (i.e., prevalence $\sim$ 50\%) |
+| $X_4$        | Binary covariate  | $`\mathbf{1}\{\mathcal{N}(0, 1) < -0.67\}`$ (i.e., prevalence $\sim$ 25\%) |
+| $X_5$        | Binary covariate      | $`\mathbf{1}\{\mathcal{N}(0, 1) < 0\}`$ (i.e., prevalence $\sim$ 50\%) |
 | $X_6$        | Binary covariate      | $`\mathbf{1}\{\mathcal{N}(0, 1) < 0.67\}`$ (i.e., prevalence $\sim$ 75\%) |
 | $A$          | Binary treatment arm  | $`\mathbf{1}\{\mathcal{N}(0, 1) > 0\}`$ (i.e., a 1:1 randomized clinical trial) |
 | $Y$          | Binary outcome        | $\mathcal{B}\big( n, p = \text{logistic} \big(  \beta_0 + \beta_1  \times X_1 + \beta_1  \times X_2 + \beta_1  \times X_4 + \beta_1  \times X_5 +   \beta_2 \times A    \big )  \big )$ |
